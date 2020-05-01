@@ -15,6 +15,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	result, error := model.TestError()
+	fmt.Println("result=====>", result)
+	fmt.Println("error=====>", error)
+
 	database := database.Database{}
 	client := database.Connect()
 
@@ -30,9 +34,9 @@ func main() {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", handler)
-	r.HandleFunc("/get_profiles", profile.GetProfiles).Methods("GET")
-	r.HandleFunc("/get_profiles/{id}", profile.GetProfileByID).Methods("GET")
-	r.HandleFunc("/login", profile.GetProfileByAccount).Methods("GET")
+	r.HandleFunc("/profiles", profile.GetProfiles).Methods("GET")
+	r.HandleFunc("/profiles/{id}", profile.GetProfileById).Methods("GET")
+	r.HandleFunc("/login", profile.GetProfileByAccount).Methods("POST")
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

@@ -103,6 +103,19 @@ func GetProfileByIdDB(client *mongo.Client, id string) (profile, error) {
 	return result, err
 }
 
+func CreateProfile(client *mongo.Client, profile profile) error {
+	fmt.Println("CreateProfile =====> ", profile)
+	col := client.Database("facebook").Collection("profile")
+	ctx, _ := context.WithTimeout(context.Background(), 15*time.Second)
+	//err := col.FindOne(context.TODO(), bson.M{"_id": docID}).Decode(&result)
+	result, err := col.InsertOne(ctx, profile)
+
+	if err != nil {
+		fmt.Println("Error calling GetProfileByIdDB:", err, result)
+	}
+	return err
+}
+
 func TestError() (string, error) {
 	return "eiei", errors.New("this is an error")
 }

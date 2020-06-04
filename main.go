@@ -30,13 +30,13 @@ func main() {
 	// }
 	// fmt.Println("Inserted a Single Document: ", insertResult.InsertedID)
 
-	profile := model.Profile{client}
+	profile := model.Profilee{client}
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", handler)
 	r.HandleFunc("/profiles", profile.GetProfiles).Methods("GET")
 	r.HandleFunc("/profiles/{id}", profile.GetProfileById).Methods("GET")
-	r.HandleFunc("/login", profile.GetProfileByAccount).Methods("POST")
+	//	r.HandleFunc("/login", profile.GetProfileByAccount).Methods("POST")
 	r.HandleFunc("/register", profile.CreateProfile).Methods("POST")
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(":8080", nil))

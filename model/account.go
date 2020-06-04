@@ -1,38 +1,40 @@
 package model
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 )
 
 type Account struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username" bson:"username"`
+	Password string `json:"password" bson:"password"`
 }
 
-func (p Profile) GetProfileByAccount(w http.ResponseWriter, r *http.Request) {
+func (p Profilee) CreateAccount(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+	var u Profile
 
-	// profile := profiles_mock()[0]
+	if r.Body == nil {
+		http.Error(w, "Please send a request body", 400)
+		return
+	}
 
-	// fmt.Println("Login")
-	// var u Account
-	// if r.Body == nil {
-	// 	http.Error(w, "Please send a request body", 400)
-	// 	return
-	// }
-	// err := json.NewDecoder(r.Body).Decode(&u)
-	// if err != nil {
-	// 	fmt.Fprintf(w, "Not found")
-	// }
+	fmt.Println("CreateProfile===>", r.Body)
+	_ = json.NewDecoder(r.Body).Decode(&u)
 
-	// w.Header().Add("Content-Type", "application/json")
-	// w.Header().Add("Access-Control-Allow-Origin", "*")
-	// w.Header().Add("Access-Control-Allow-Headers", "*")
+	ctx, _ := context.WithTimeout(context.Background(), 15*time.Second)
+	col := p.Client.Database("facebook").Collection("profile")
+	result, insertErr := col.InsertOne(ctx, u)
+	if insertErr != nil {
+		fmt.Println(insertErr)
+	} else {
+		fmt.Println(result)
+	}
 
-	// json.NewEncoder(w).Encode(profile)
-
-	// json.NewEncoder(w).Encode(r)
-	//fmt.Fprintf(w, "Login")
-	//fmt.Println("GetProfileById :", id)
+	json.NewEncoder(w).Encode(result)
 }
 
 // func profiles_mock() []profile {

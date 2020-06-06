@@ -7,9 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"time"
-
 	"errors"
+	"time"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
@@ -105,6 +104,9 @@ func getProfileByIdDB(client *mongo.Client, id string) (Profile, error) {
 
 func (p Profilee) CreateProfile(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+	w.Header().Add("Access-Control-Allow-Headers", "*")
+
 	var u Profile
 	var a Account
 
@@ -133,16 +135,15 @@ func (p Profilee) CreateProfile(w http.ResponseWriter, r *http.Request) {
 	ctx, _ := context.WithTimeout(context.Background(), 15*time.Second)
 
 	col := p.Client.Database("facebook").Collection("profile")
-	result, insertErr := col.InsertOne(ctx, u)
+	result, _ := col.InsertOne(ctx, u)
 	json.NewEncoder(w).Encode(result)
 
-	col = p.Client.Database("facebook").Collection("account")
-	result, insertErr = col.InsertOne(ctx, a)
-	if insertErr != nil {
-		fmt.Println(insertErr)
-	} else {
-		fmt.Println(result)
-	}
+	// oid, _ := result.InsertedID.(primitive.ObjectID)
+	// fmt.Println("oid====>", oid)
+	// a.ProfileID = oid
+
+	// col2 := p.Client.Database("facebook").Collection("account")
+	// result, _ = col2.InsertOne(ctx, a)
 	json.NewEncoder(w).Encode(result)
 }
 

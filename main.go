@@ -30,14 +30,30 @@ func main() {
 	// }
 	// fmt.Println("Inserted a Single Document: ", insertResult.InsertedID)
 
+	// e := echo.New()
+	// e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+	// 	AllowOrigins:     []string{"*"},
+	// 	AllowMethods:     []string{http.MethodGet, http.MethodDelete, http.MethodPost, http.MethodPut, http.MethodPatch},
+	// 	AllowHeaders:     []string{"Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "accept", "origin", "Cache-Control", "X-Requested-With"},
+	// 	AllowCredentials: true,
+	// 	ExposeHeaders:    []string{"Content-Disposition"},
+	// }))
+	// e.Use(middleware.Logger())
+
+	// Enable recover APIs panic
+	// TODO: re-enable when push
+	// e.Use(middleware.Recover())
+
 	profile := model.Profilee{client}
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", handler)
-	r.HandleFunc("/profiles", profile.GetProfiles).Methods("GET")
-	r.HandleFunc("/profiles/{id}", profile.GetProfileById).Methods("GET")
+	r.HandleFunc("/profiles", profile.GetProfiles).Methods("GET", "OPTIONS")
+	r.HandleFunc("/profiles/{id}", profile.GetProfileById).Methods("GET", "OPTIONS")
 	//	r.HandleFunc("/login", profile.GetProfileByAccount).Methods("POST")
-	r.HandleFunc("/register", profile.CreateProfile).Methods("POST")
+	r.HandleFunc("/register", profile.CreateProfile).Methods("POST", "OPTIONS")
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(":8080", nil))
+
+	// e.Logger.Fatal(e.Start(":" + "8080"))
 }

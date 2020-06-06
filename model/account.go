@@ -1,41 +1,24 @@
 package model
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"time"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Account struct {
-	Username string `json:"username" bson:"username"`
-	Password string `json:"password" bson:"password"`
+	ProfileID primitive.ObjectID `json:"profileID" bson:"profile_id"`
+	Username  string             `json:"username" bson:"username"`
+	Password  string             `json:"password" bson:"password"`
 }
 
-func (p Profilee) CreateAccount(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "application/json")
-	var u Profile
+// func GetProfileByAccountDB(client *mongo.Client, acc Account) (Profile, error) {
+// 	var result Profile
+// 	col := client.Database("facebook").Collection("profile")
+// 	docID, _ := primitive.ObjectIDFromHex(id)
+// 	ctx, _ := context.WithTimeout(context.Background(), 15*time.Second)
+// 	err := col.FindOne(ctx, bson.M{"_id": docID}).Decode(&result)
 
-	if r.Body == nil {
-		http.Error(w, "Please send a request body", 400)
-		return
-	}
-
-	fmt.Println("CreateProfile===>", r.Body)
-	_ = json.NewDecoder(r.Body).Decode(&u)
-
-	ctx, _ := context.WithTimeout(context.Background(), 15*time.Second)
-	col := p.Client.Database("facebook").Collection("profile")
-	result, insertErr := col.InsertOne(ctx, u)
-	if insertErr != nil {
-		fmt.Println(insertErr)
-	} else {
-		fmt.Println(result)
-	}
-
-	json.NewEncoder(w).Encode(result)
-}
+// 	return result, err
+// }
 
 // func profiles_mock() []profile {
 // 	profiles := []profile{

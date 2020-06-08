@@ -44,14 +44,13 @@ func main() {
 	// TODO: re-enable when push
 	// e.Use(middleware.Recover())
 
-	profile := model.Profilee{client}
+	db := model.Database{client}
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", handler)
-	r.HandleFunc("/profiles", profile.GetProfiles).Methods("GET", "OPTIONS")
-	r.HandleFunc("/profiles/{id}", profile.GetProfileById).Methods("GET", "OPTIONS")
-	//	r.HandleFunc("/login", profile.GetProfileByAccount).Methods("POST")
-	r.HandleFunc("/register", profile.CreateProfile).Methods("POST", "OPTIONS")
+	r.HandleFunc("/profiles", db.GetProfiles).Methods("GET", "OPTIONS")
+	r.HandleFunc("/profiles/{id}", db.GetProfileById).Methods("GET", "OPTIONS")
+	r.HandleFunc("/register", db.CreateProfile).Methods("POST", "OPTIONS")
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 

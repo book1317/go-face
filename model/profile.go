@@ -8,7 +8,8 @@ import (
 	"net/http"
 
 	"errors"
-	"time"
+
+	"reflect"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
@@ -19,10 +20,6 @@ import (
 var database_name = "facebook"
 var collection_name = "Profile"
 
-type Profilee struct {
-	Client *mongo.Client
-}
-
 type Profile struct {
 	ObjectID  primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
 	Firstname string             `json:"firstname" bson:"firstname"`
@@ -30,8 +27,8 @@ type Profile struct {
 	Image     string             `json:"image" bson:"image"`
 }
 
-func (p Profilee) GetProfiles(w http.ResponseWriter, r *http.Request) {
-	Profile, err := getProfilesDB(p.Client)
+func (db Database) GetProfiles(w http.ResponseWriter, r *http.Request) {
+	Profile, err := getProfilesDB(db.Client)
 	//w.WriteHeader(http.StatusOK)
 	if err != nil {
 		fmt.Fprintf(w, "Not found")
@@ -45,11 +42,11 @@ func (p Profilee) GetProfiles(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (p Profilee) GetProfileById(w http.ResponseWriter, r *http.Request) {
+func (db Database) GetProfileById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	//w.WriteHeader(http.StatusOK)
 	id, _ := vars["id"]
-	Profile, err := getProfileByIdDB(p.Client, id)
+	Profile, err := getProfileByIdDB(db.Client, id)
 
 	if err != nil {
 		fmt.Fprintf(w, "Not found")
@@ -66,13 +63,12 @@ func (p Profilee) GetProfileById(w http.ResponseWriter, r *http.Request) {
 func getProfilesDB(client *mongo.Client) ([]Profile, error) {
 	var result []Profile
 	col := client.Database(database_name).Collection(collection_name)
-	ctx, _ := context.WithTimeout(context.Background(), 15*time.Second)
 	cursor, err := col.Find(context.TODO(), bson.D{})
 	if err != nil {
 		fmt.Println("Finding all documents ERROR:", err)
-		defer cursor.Close(ctx)
+		defer cursor.Close(context.TODO())
 	} else {
-		for cursor.Next(ctx) {
+		for cursor.Next(context.TODO()) {
 			var res bson.M
 			err := cursor.Decode(&res) // If there is a cursor.Decode error
 			if err != nil {
@@ -92,9 +88,9 @@ func getProfileByIdDB(client *mongo.Client, id string) (Profile, error) {
 	var result Profile
 	col := client.Database("facebook").Collection("profile")
 	docID, _ := primitive.ObjectIDFromHex(id)
-	ctx, _ := context.WithTimeout(context.Background(), 15*time.Second)
+	// ctx, _ := context.WithTimeout(context.Background(), 15*time.Second)
 	//err := col.FindOne(context.TODO(), bson.M{"_id": docID}).Decode(&result)
-	err := col.FindOne(ctx, bson.M{"_id": docID}).Decode(&result)
+	err := col.FindOne(context.TODO(), bson.M{"_id": docID}).Decode(&result)
 
 	// if err != nil {
 	// 	fmt.Println("Error calling getProfileByIdDB:", err)
@@ -102,16 +98,16 @@ func getProfileByIdDB(client *mongo.Client, id string) (Profile, error) {
 	return result, err
 }
 
-func (p Profilee) CreateProfile(w http.ResponseWriter, r *http.Request) {
+func (db Database) CreateProfile(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Header().Add("Access-Control-Allow-Headers", "*")
 
-	var u Profile
-	var a Account
+	var profile Profile
+	var account Account
 
-	if r.Body == nil {
-		http.Error(w, "Please send a request body", 400)
+	if r.Body == http.NoBody {
+		//http.Error(w, "Please send a request body", 400)
 		return
 	}
 
@@ -119,36 +115,33 @@ func (p Profilee) CreateProfile(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// handler error
 	}
-
-	if err := json.Unmarshal(k, &u); err != nil {
+	if err := json.Unmarshal(k, &profile); err != nil {
 		// handle error
 	}
-
-	if err := json.Unmarshal(k, &a); err != nil {
+	if err := json.Unmarshal(k, &account); err != nil {
 		// handle error
 	}
 
 	// _ = json.NewDecoder(r.Body).Decode(&u)
-	fmt.Println("Profile===>", u)
-	fmt.Println("Account===>", a)
+	profileID, err := db.insertProfileDB(profile)
+	json.NewEncoder(w).Encode(profileID)
+	account.ProfileID = profileID
 
-	ctx, _ := context.WithTimeout(context.Background(), 15*time.Second)
+	//result, err := db.InserAccountDB(account)
 
-	col := p.Client.Database("facebook").Collection("profile")
-	result, _ := col.InsertOne(ctx, u)
-	json.NewEncoder(w).Encode(result)
+	// db.CreateAccount()
 
-	// oid, _ := result.InsertedID.(primitive.ObjectID)
-	// fmt.Println("oid====>", oid)
-	// a.ProfileID = oid
-
-	// col2 := p.Client.Database("facebook").Collection("account")
-	// result, _ = col2.InsertOne(ctx, a)
-	json.NewEncoder(w).Encode(result)
+	// 	col2 := db.Client.Database("facebook").Collection("account")
+	// 	ctx, _ := context.WithTimeout(context.Background(), 15*time.Second)
+	// 	result, _ := col2.InsertOne(ctx, account)
 }
 
-func createProfileDB(client *mongo.Client, Profile Profile) error {
-	return nil
+func (db Database) insertProfileDB(profile Profile) (primitive.ObjectID, error) {
+	col := db.Client.Database("facebook").Collection("profile")
+	result, err := col.InsertOne(context.TODO(), profile)
+	fmt.Println(reflect.TypeOf(result))
+	profileID, _ := result.InsertedID.(primitive.ObjectID)
+	return profileID, err
 }
 
 func TestError() (string, error) {

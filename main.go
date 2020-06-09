@@ -1,58 +1,31 @@
 package main
 
 import (
-	"fmt"
 	"go-face/database"
 	"go-face/model"
-	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "404", r.URL.Path[1:])
-}
-
 func main() {
-	result, error := model.TestError()
-	fmt.Println("result=====>", result)
-	fmt.Println("error=====>", error)
+	e := echo.New()
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{http.MethodGet, http.MethodDelete, http.MethodPost, http.MethodPut, http.MethodPatch},
+		AllowHeaders: []string{"*"},
+		//[]string{"Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "accept", "origin", "Cache-Control", "X-Requested-With"},
+		AllowCredentials: true,
+		ExposeHeaders:    []string{"Content-Disposition"},
+	}))
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 
 	database := database.Database{}
 	client := database.Connect()
-
-	//collection := client.Database("facebook").Collection("profile")
-	// data := models.PROFILES_MOCK()[0]
-	// insertResult, err := collection.InsertOne(context.TODO(), data)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Println("Inserted a Single Document: ", insertResult.InsertedID)
-
-	// e := echo.New()
-	// e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-	// 	AllowOrigins:     []string{"*"},
-	// 	AllowMethods:     []string{http.MethodGet, http.MethodDelete, http.MethodPost, http.MethodPut, http.MethodPatch},
-	// 	AllowHeaders:     []string{"Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "accept", "origin", "Cache-Control", "X-Requested-With"},
-	// 	AllowCredentials: true,
-	// 	ExposeHeaders:    []string{"Content-Disposition"},
-	// }))
-	// e.Use(middleware.Logger())
-
-	// Enable recover APIs panic
-	// TODO: re-enable when push
-	// e.Use(middleware.Recover())
-
 	db := model.Database{client}
 
-	r := mux.NewRouter()
-	r.HandleFunc("/", handler)
-	r.HandleFunc("/profiles", db.GetProfiles).Methods("GET", "OPTIONS")
-	r.HandleFunc("/profiles/{id}", db.GetProfileById).Methods("GET", "OPTIONS")
-	r.HandleFunc("/register", db.CreateProfile).Methods("POST", "OPTIONS")
-	http.Handle("/", r)
-	log.Fatal(http.ListenAndServe(":8080", nil))
-
-	// e.Logger.Fatal(e.Start(":" + "8080"))
+	e.POST("/register", db.Register)
+	e.Logger.Fatal(e.Start(":" + "8080"))
 }

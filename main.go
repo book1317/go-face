@@ -27,5 +27,6 @@ func main() {
 	db := model.Database{client}
 
 	e.POST("/register", db.Register)
+	e.POST("/login", db.Login)
 	e.Logger.Fatal(e.Start(":" + "8080"))
 }

@@ -7,10 +7,8 @@ import (
 )
 
 type Register struct {
-	Username  string `json:"username" bson:"username"`
-	Password  string `json:"password" bson:"password"`
-	Firstname string `json:"firstname" bson:"firstname"`
-	Lastname  string `json:"lastname" bson:"lastname"`
+	Profile Profile `json:"profile" bson:"profile"`
+	Account Account `json:"account" bson:"account"`
 }
 
 func (db Database) Register(c echo.Context) error {
@@ -22,15 +20,13 @@ func (db Database) Register(c echo.Context) error {
 		return err
 	}
 
-	profile.Firstname = register.Firstname
-	profile.Lastname = register.Lastname
+	profile = register.Profile
 	profileID, err := db.insertProfileDB(profile)
 	if err != nil {
 		return err
 	}
 
-	account.Username = register.Username
-	account.Password = register.Password
+	account = register.Account
 	account.ProfileID = profileID
 	result, err := db.InserAccountDB(account)
 	if err != nil {

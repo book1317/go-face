@@ -22,7 +22,7 @@ func (db Database) Login(c echo.Context) error {
 		})
 	}
 
-	profile, err := getProfileByAccountDB(db.Client, *account)
+	profile, err := getProfileByUsernameDB(db.Client, *account)
 	if err != nil {
 		fmt.Println("error ===> no document")
 		return c.JSON(http.StatusNotFound, gin.H{
@@ -32,25 +32,27 @@ func (db Database) Login(c echo.Context) error {
 	return c.JSON(http.StatusOK, profile)
 }
 
-func getProfileByAccountDB(client *mongo.Client, account Account) (*Profile, error) {
+func getProfileByUsernameDB(client *mongo.Client, account Account) (*Profile, error) {
 	var profile Profile
 	var accountWithProfileID Account
 
-	col := client.Database(db_facebook).Collection("account")
+	col := client.Database(db_facebook).Collection(co_account)
 	err := col.FindOne(context.TODO(), bson.M{"username": account.Username}).Decode(&accountWithProfileID)
 	if err != nil {
-		return nil, err
 		fmt.Println("error ===> no account")
+		return nil, err
 	}
 
-	fmt.Printf("accountWithProfileID ====> %+v", accountWithProfileID)
-	col = client.Database(db_facebook).Collection("profile")
-	// profileID, _ := primitive.ObjectIDFromHex(accountWithProfileID.ProfileID)
-	// profileID, _ := primitive.ObjectIDFromHex("5f5a6a696f33b160afe72452")
+	if account.Password != accountWithProfileID.Password {
+		fmt.Println("error ===> wrong password")
+		return nil, err
+	}
+
+	col = client.Database(db_facebook).Collection(co_profile)
 	err = col.FindOne(context.TODO(), bson.M{"_id": accountWithProfileID.ProfileID}).Decode(&profile)
 	if err != nil {
-		return nil, err
 		fmt.Println("error ===> no profile")
+		return nil, err
 	}
 	return &profile, err
 }

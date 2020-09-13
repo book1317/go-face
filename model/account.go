@@ -14,7 +14,7 @@ type Account struct {
 }
 
 func (db Database) InserAccountDB(account Account) (*mongo.InsertOneResult, error) {
-	col := db.Client.Database("facebook").Collection("account")
+	col := db.Client.Database(db_facebook).Collection(co_account)
 	result, err := col.InsertOne(context.TODO(), account)
 	return result, err
 }

@@ -14,7 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var database_name = "facebook"
+var database_name = db_facebook
 var collection_name = "Profile"
 
 type Profile struct {
@@ -81,14 +81,14 @@ func getProfilesDB(client *mongo.Client) ([]Profile, error) {
 
 func getProfileByIdDB(client *mongo.Client, id string) (Profile, error) {
 	var result Profile
-	col := client.Database("facebook").Collection("profile")
+	col := client.Database(db_facebook).Collection("profile")
 	docID, _ := primitive.ObjectIDFromHex(id)
 	err := col.FindOne(context.TODO(), bson.M{"_id": docID}).Decode(&result)
 	return result, err
 }
 
 func (db Database) insertProfileDB(profile Profile) (primitive.ObjectID, error) {
-	col := db.Client.Database("facebook").Collection("profile")
+	col := db.Client.Database(db_facebook).Collection("profile")
 	result, err := col.InsertOne(context.TODO(), profile)
 	fmt.Println(reflect.TypeOf(result))
 	profileID, _ := result.InsertedID.(primitive.ObjectID)

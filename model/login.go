@@ -36,7 +36,7 @@ func getProfileByAccountDB(client *mongo.Client, account Account) (*Profile, err
 	var profile Profile
 	var accountWithProfileID Account
 
-	col := client.Database("facebook").Collection("account")
+	col := client.Database(db_facebook).Collection("account")
 	err := col.FindOne(context.TODO(), bson.M{"username": account.Username}).Decode(&accountWithProfileID)
 	if err != nil {
 		return nil, err
@@ -44,7 +44,7 @@ func getProfileByAccountDB(client *mongo.Client, account Account) (*Profile, err
 	}
 
 	fmt.Printf("accountWithProfileID ====> %+v", accountWithProfileID)
-	col = client.Database("facebook").Collection("profile")
+	col = client.Database(db_facebook).Collection("profile")
 	// profileID, _ := primitive.ObjectIDFromHex(accountWithProfileID.ProfileID)
 	// profileID, _ := primitive.ObjectIDFromHex("5f5a6a696f33b160afe72452")
 	err = col.FindOne(context.TODO(), bson.M{"_id": accountWithProfileID.ProfileID}).Decode(&profile)

@@ -28,5 +28,7 @@ func main() {
 
 	e.POST("/register", db.Register)
 	e.POST("/login", db.Login)
+	e.POST("/post", db.CreatePost)
+	e.GET("/post", db.GetPosts)
 	e.Logger.Fatal(e.Start(":" + "8080"))
 }

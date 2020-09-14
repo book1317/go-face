@@ -30,5 +30,6 @@ func main() {
 	e.POST("/login", db.Login)
 	e.POST("/post", db.CreatePost)
 	e.GET("/post", db.GetPosts)
+	e.PATCH("/comment/:id", db.InserComment)
 	e.Logger.Fatal(e.Start(":" + "8080"))
 }

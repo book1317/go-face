@@ -54,13 +54,11 @@ func (db Database) InserComment(c echo.Context) error {
 	fmt.Println("InserComment")
 	comment := new(Comment)
 	postId := c.Param("id")
-	fmt.Println("postId ==== > ", postId)
 
 	if err := c.Bind(comment); err != nil {
 		fmt.Println("error Bind Post")
 		return err
 	}
-	fmt.Printf("comment ==== > %+v", comment)
 
 	err := inserCommentToPostByIdDB(db.Client, postId, comment)
 	if err != nil {

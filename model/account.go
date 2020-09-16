@@ -13,8 +13,8 @@ type Account struct {
 	Password  string             `json:"password" bson:"password"`
 }
 
-func (db Database) InserAccountDB(account Account) (*mongo.InsertOneResult, error) {
-	col := db.Client.Database(db_facebook).Collection(co_account)
+func InserAccountDB(client *mongo.Client, account Account) (*mongo.InsertOneResult, error) {
+	col := client.Database(db_facebook).Collection(co_account)
 	result, err := col.InsertOne(context.TODO(), account)
 	return result, err
 }

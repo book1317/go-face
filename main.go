@@ -2,20 +2,24 @@ package main
 
 import (
 	"go-face/database"
-	"go-face/model"
+	"go-face/handler"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"go.mongodb.org/mongo-driver/mongo"
 )
+
+type Database struct {
+	Client *mongo.Client
+}
 
 func main() {
 	e := echo.New()
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"*"},
-		AllowMethods: []string{http.MethodGet, http.MethodDelete, http.MethodPost, http.MethodPut, http.MethodPatch},
-		AllowHeaders: []string{"*"},
-		//[]string{"Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "accept", "origin", "Cache-Control", "X-Requested-With"},
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{http.MethodGet, http.MethodDelete, http.MethodPost, http.MethodPut, http.MethodPatch},
+		AllowHeaders:     []string{"*"},
 		AllowCredentials: true,
 		ExposeHeaders:    []string{"Content-Disposition"},
 	}))
@@ -24,7 +28,7 @@ func main() {
 
 	database := database.Database{}
 	client := database.Connect()
-	db := model.Database{client}
+	db := handler.Database{client}
 
 	e.POST("/register", db.Register)
 	e.POST("/login", db.Login)

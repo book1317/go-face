@@ -4,12 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net/http"
 
 	"go.mongodb.org/mongo-driver/bson"
 
-	"github.com/gin-gonic/gin"
-	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -29,70 +26,15 @@ type Post struct {
 	Owner    Profile            `json:"owner" bson:"owner"`
 }
 
-func (db Database) CreatePost(c echo.Context) error {
-	fmt.Printf("CreatePost=======")
-	post := new(Post)
-
-	if err := c.Bind(post); err != nil {
-		fmt.Printf("post ==== > %+v", post)
-		fmt.Println("error Bind Post")
-		return err
-	}
-
-	postID, err := db.insertPostDB(*post)
-	if err != nil {
-		return err
-	}
-
-	postWithID := post
-	postWithID.ObjectID = postID
-
-	return c.JSON(http.StatusCreated, postWithID)
-}
-
-func (db Database) InserComment(c echo.Context) error {
-	fmt.Println("InserComment")
-	comment := new(Comment)
-	postId := c.Param("id")
-
-	if err := c.Bind(comment); err != nil {
-		fmt.Println("error Bind Post")
-		return err
-	}
-
-	err := inserCommentToPostByIdDB(db.Client, postId, comment)
-	if err != nil {
-		fmt.Println("error ====> cannot inser comment")
-		return err
-	}
-	post, err := getPostByIdDB(db.Client, postId)
-	if err != nil {
-		fmt.Println("error ====> cannot get post")
-		return err
-	}
-
-	return c.JSON(http.StatusOK, gin.H{"data": post})
-}
-
-func (db Database) GetPosts(c echo.Context) error {
-	Posts, err := getPostsDB(db.Client)
-	if err != nil {
-		fmt.Println("error ====> document not found")
-		return err
-	}
-	fmt.Printf("Posts =====> %+v", Posts)
-	return c.JSON(http.StatusOK, Posts)
-}
-
-func (db Database) insertPostDB(post Post) (primitive.ObjectID, error) {
-	col := db.Client.Database(db_facebook).Collection(co_post)
+func InsertPostDB(client *mongo.Client, post *Post) (primitive.ObjectID, error) {
+	col := client.Database(db_facebook).Collection(co_post)
 	result, err := col.InsertOne(context.TODO(), post)
 	fmt.Printf("result =====> %+v", result)
 	postID, _ := result.InsertedID.(primitive.ObjectID)
 	return postID, err
 }
 
-func getPostsDB(client *mongo.Client) ([]Post, error) {
+func GetPostsDB(client *mongo.Client) ([]Post, error) {
 	fmt.Println("====> getPostsDB")
 	var result []Post
 	col := client.Database(db_facebook).Collection(co_post)
@@ -116,7 +58,7 @@ func getPostsDB(client *mongo.Client) ([]Post, error) {
 	}
 	return result, err
 }
-func getPostByIdDB(client *mongo.Client, postID string) (Post, error) {
+func GetPostByIdDB(client *mongo.Client, postID string) (Post, error) {
 	var post Post
 	col := client.Database(db_facebook).Collection(co_post)
 	id, _ := primitive.ObjectIDFromHex(postID)
@@ -127,7 +69,7 @@ func getPostByIdDB(client *mongo.Client, postID string) (Post, error) {
 	return post, err
 }
 
-func inserCommentToPostByIdDB(client *mongo.Client, postID string, comment *Comment) error {
+func InserCommentToPostByIdDB(client *mongo.Client, postID string, comment *Comment) error {
 	id, _ := primitive.ObjectIDFromHex(postID)
 	col := client.Database(db_facebook).Collection(co_post)
 	result, err := col.UpdateOne(

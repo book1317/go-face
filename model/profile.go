@@ -42,12 +42,16 @@ func GetProfilesDB(client *mongo.Client) ([]Profile, error) {
 	return result, err
 }
 
-func GetProfileByIdDB(client *mongo.Client, id string) (Profile, error) {
-	var result Profile
+func GetProfileByIdDB(client *mongo.Client, id string) (*Profile, error) {
+	var profile Profile
 	col := client.Database(db_facebook).Collection(co_profile)
 	docID, _ := primitive.ObjectIDFromHex(id)
-	err := col.FindOne(context.TODO(), bson.M{"_id": docID}).Decode(&result)
-	return result, err
+	err := col.FindOne(context.TODO(), bson.M{"_id": docID}).Decode(&profile)
+	if err != nil {
+		fmt.Println("error cannot find document")
+		return nil, err
+	}
+	return &profile, err
 }
 
 func InsertProfileDB(client *mongo.Client, profile Profile) (primitive.ObjectID, error) {

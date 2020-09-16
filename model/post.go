@@ -15,7 +15,7 @@ type Comment struct {
 	ObjectID primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
 	Content  string             `json:"content" bson:"content"`
 	Like     int                `json:"like" bson:"like"`
-	Owner    Profile            `json:"owner" bson:"owner"`
+	OwnerId  primitive.ObjectID `json:"owner_id" bson:"owner_id"`
 }
 
 type Post struct {
@@ -23,13 +23,12 @@ type Post struct {
 	Content  string             `json:"content" bson:"content"`
 	Like     int                `json:"like" bson:"like"`
 	Comments []Comment          `json:"comments" bson:"comments"`
-	Owner    Profile            `json:"owner" bson:"owner"`
+	OwnerId  primitive.ObjectID `json:"owner_id" bson:"owner_id"`
 }
 
 func InsertPostDB(client *mongo.Client, post *Post) (primitive.ObjectID, error) {
 	col := client.Database(db_facebook).Collection(co_post)
 	result, err := col.InsertOne(context.TODO(), post)
-	fmt.Printf("result =====> %+v", result)
 	postID, _ := result.InsertedID.(primitive.ObjectID)
 	return postID, err
 }

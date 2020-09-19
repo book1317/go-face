@@ -55,11 +55,11 @@ func (db Database) InserComment(c echo.Context) error {
 }
 
 func (db Database) GetPosts(c echo.Context) error {
-	Posts, err := model.GetPostsDB(db.Client)
+	posts, err := model.GetPostsDB(db.Client)
 	if err != nil {
 		fmt.Println("error ====> document not found")
 		return err
 	}
 	// fmt.Printf("Posts =====> %+v", Posts)
-	return c.JSON(http.StatusOK, Posts)
+	return c.JSON(http.StatusOK, gin.H{"data": posts})
 }

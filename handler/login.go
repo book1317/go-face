@@ -20,12 +20,14 @@ func (db Database) Login(c echo.Context) error {
 		})
 	}
 
-	profile, err := model.GetProfileByUsernameDB(db.Client, *account)
+	profileId, err := model.GetProfileByUsernameDB(db.Client, *account)
 	if err != nil {
 		fmt.Println("error ===> no document")
 		return c.JSON(http.StatusNotFound, gin.H{
 			"code": http.StatusNotFound,
 		})
 	}
-	return c.JSON(http.StatusOK, profile)
+
+	fmt.Println("profileId", profileId)
+	return c.JSON(http.StatusOK, profileId)
 }

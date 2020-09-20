@@ -8,8 +8,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func GetProfileByUsernameDB(client *mongo.Client, account Account) (*Profile, error) {
-	var profile Profile
+func GetProfileByUsernameDB(client *mongo.Client, account Account) (*string, error) {
+	// var profile Profile
 	var accountWithProfileID Account
 
 	col := client.Database(db_facebook).Collection(co_account)
@@ -24,11 +24,12 @@ func GetProfileByUsernameDB(client *mongo.Client, account Account) (*Profile, er
 		return nil, err
 	}
 
-	col = client.Database(db_facebook).Collection(co_profile)
-	err = col.FindOne(context.TODO(), bson.M{"_id": accountWithProfileID.ProfileID}).Decode(&profile)
-	if err != nil {
-		fmt.Println("error ===> no profile")
-		return nil, err
-	}
-	return &profile, err
+	// col = client.Database(db_facebook).Collection(co_profile)
+	// err = col.FindOne(context.TODO(), bson.M{"_id": accountWithProfileID.ProfileID}).Decode(&profile)
+	// if err != nil {
+	// 	fmt.Println("error ===> no profile")
+	// 	return nil, err
+	// }
+	profileId := accountWithProfileID.ProfileID.Hex()
+	return &profileId, err
 }

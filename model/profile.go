@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"reflect"
 
@@ -16,6 +17,10 @@ type Profile struct {
 	Firstname string             `json:"firstname" bson:"firstname"`
 	Lastname  string             `json:"lastname" bson:"lastname"`
 	Image     string             `json:"image" bson:"image"`
+}
+
+type Image struct {
+	Image string `json:"image" bson:"image"`
 }
 
 func GetProfilesDB(client *mongo.Client) ([]Profile, error) {
@@ -60,4 +65,23 @@ func InsertProfileDB(client *mongo.Client, profile Profile) (primitive.ObjectID,
 	fmt.Println(reflect.TypeOf(result))
 	profileID, _ := result.InsertedID.(primitive.ObjectID)
 	return profileID, err
+}
+
+func UpdateProfileImageDB(client *mongo.Client, profileId string, image Image) (*primitive.ObjectID, error) {
+	col := client.Database(db_facebook).Collection(co_profile)
+	id, _ := primitive.ObjectIDFromHex(profileId)
+	result, err := col.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": id},
+		bson.D{
+			{"$set", bson.D{{"image", image.Image}}},
+		},
+	)
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+
+	profileID, _ := result.UpsertedID.(primitive.ObjectID)
+	return &profileID, err
 }

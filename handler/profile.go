@@ -21,7 +21,6 @@ func (db Database) GetProfiles(w http.ResponseWriter, r *http.Request) {
 
 func (db Database) GetProfileById(c echo.Context) error {
 	profileId := c.Param("id")
-	fmt.Println("profileId ===>", profileId)
 
 	profile, err := model.GetProfileByIdDB(db.Client, profileId)
 	if err != nil {
@@ -29,4 +28,30 @@ func (db Database) GetProfileById(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 	return c.JSON(http.StatusOK, gin.H{"data": profile})
+}
+
+func (db Database) UpdateProfileImageById(c echo.Context) error {
+	fmt.Println("UpdateProfileImageById")
+
+	profileId := c.Param("id")
+	profileImage := model.Image{}
+	// fmt.Printf("c.Request.Body ===> %+v", c.Request)
+
+	fmt.Println("profileIdd", profileId)
+	if err := c.Bind(&profileImage); err != nil {
+		fmt.Println("error ===> no payload")
+		return c.JSON(http.StatusBadRequest, gin.H{
+			"code": http.StatusBadRequest,
+		})
+	}
+
+	profileIdd, err := model.UpdateProfileImageDB(db.Client, profileId, profileImage)
+	if err != nil {
+		fmt.Println("error ====> GetProfileByIdDB")
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	fmt.Println("profileIdd", profileIdd)
+
+	return c.JSON(http.StatusOK, gin.H{"data": profileIdd})
 }

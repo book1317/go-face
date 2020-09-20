@@ -32,8 +32,8 @@ func main() {
 
 	e.POST("/register", db.Register)
 	e.POST("/login", db.Login)
-	e.POST("/post", db.CreatePost)
-	e.GET("/post", db.GetPosts)
+	e.POST("/posts", db.CreatePost)
+	e.GET("/posts", db.GetPosts)
 	e.GET("/profile/:id", db.GetProfileById)
 	e.PATCH("/profile/image/:id", db.UpdateProfileImageById)
 	e.PATCH("/comment/:id", db.InserComment)

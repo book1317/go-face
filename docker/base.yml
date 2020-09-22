@@ -1,0 +1,7 @@
+version: "2"
+services:
+  go:
+    build: ./go
+    # image: go-facebook-api
+    image: golang:1.14-alpine
+    container_name: go-facebook-api

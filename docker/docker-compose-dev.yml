@@ -1,0 +1,9 @@
+version: "2"
+services:
+  go-facebook-api:
+    environment:
+      GO_ENV: "develop"
+      VIRTUAL_PORT: 2001
+      VIRTUAL_HOST: "go-facebook.brookietesto.tech"
+      LETSENCRYPT_HOST: "go-facebook.brookietesto.tech"
+      LETSENCRYPT_EMAIL: "bookboksforweb@gmail.com"

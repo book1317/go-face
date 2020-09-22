@@ -1,0 +1,17 @@
+version: "2"
+services:
+  go-facebook-api:
+    # restart: always
+    extends:
+      file: base.yml
+      service: go
+    expose:
+      - 8080
+    volumes:
+      - ../:/go/src/go-face
+    working_dir: /go/src/go-face
+
+networks:
+  default:
+    external:
+      name: sandbox_network

@@ -21,10 +21,12 @@ ENV WORKING_DIR /go/src
 WORKDIR $WORKING_DIR
 COPY . .
 # RUN apk update && apk add git --no-cache
-RUN chmod +x ./go-bot
-# RUN go get
-# RUN go build .
-EXPOSE 2095
+RUN go get
+RUN go build
+RUN ls
+RUN chmod +x ./go-face
+
+EXPOSE 8080
 
 # CMD ["sleep", "7200"]
-CMD ["./go-face"]
+CMD ["go-face"]

@@ -54,7 +54,7 @@ func (db Database) InserComment(c echo.Context) error {
 func (db Database) GetPosts(c echo.Context) error {
 	posts, err := model.GetPostsDB(db.Client)
 	if err != nil {
-		fmt.Println("error ====> document not found")
+		fmt.Println("error ====> document not found ", err)
 		return err
 	}
 	// fmt.Printf("Posts =====> %+v", Posts)

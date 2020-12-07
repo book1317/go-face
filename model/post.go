@@ -26,6 +26,15 @@ type Post struct {
 	OwnerId  primitive.ObjectID `json:"owner_id" bson:"owner_id"`
 }
 
+type PostRequest struct {
+	ObjectID     primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+	Content      string             `json:"content" bson:"content"`
+	Like         []int              `json:"like" bson:"like"`
+	Comments     []Comment          `json:"comments" bson:"comments"`
+	OwnerId      primitive.ObjectID `json:"owner_id" bson:"owner_id"`
+	OwnerProfile Profile            `json:"owner_profile" bson:"owner_profile"`
+}
+
 func InsertPostDB(client *mongo.Client, post Post) (primitive.ObjectID, error) {
 	col := client.Database(db_facebook).Collection(co_post)
 	result, err := col.InsertOne(context.TODO(), post)
@@ -33,30 +42,36 @@ func InsertPostDB(client *mongo.Client, post Post) (primitive.ObjectID, error) {
 	return postID, err
 }
 
-func GetPostsDB(client *mongo.Client) ([]Post, error) {
-	fmt.Println("====> getPostsDB")
-	var result []Post
+func GetPostsDB(client *mongo.Client) ([]PostRequest, error) {
+	var post []PostRequest
+	var temp []interface{}
 	col := client.Database(db_facebook).Collection(co_post)
-	cursor, err := col.Find(context.TODO(), bson.D{})
+
+	pipline := []bson.M{
+		bson.M{
+			"$lookup": bson.M{
+				"from":         co_profile,
+				"localField":   "owner_id",
+				"foreignField": "_id",
+				"as":           "owner_profile",
+			}},
+		{"$unwind": "$owner_profile"},
+	}
+
+	cur, err := col.Aggregate(context.TODO(), pipline)
 	if err != nil {
 		fmt.Println("Finding all documents ERROR:", err)
-		defer cursor.Close(context.TODO())
-	} else {
-		for cursor.Next(context.TODO()) {
-			var res bson.M
-			err := cursor.Decode(&res)
-			if err != nil {
-				fmt.Println("cursor.Next() error:", err)
-			} else {
-				var Post Post
-				bsonBytes, _ := bson.Marshal(res)
-				bson.Unmarshal(bsonBytes, &Post)
-				result = append(result, Post)
-			}
-		}
+		return nil, err
 	}
-	return result, err
+
+	if err := cur.All(context.TODO(), &post); err != nil {
+		return nil, err
+	}
+
+	fmt.Printf("temp ===> %+v", temp)
+	return post, err
 }
+
 func GetPostByIdDB(client *mongo.Client, postID string) (Post, error) {
 	var post Post
 	col := client.Database(db_facebook).Collection(co_post)

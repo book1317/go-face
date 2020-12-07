@@ -1,0 +1,6 @@
+users:
+  enable: false
+
+mongo:
+  # connection_string: "mongodb+srv://teerapat:HDrLv7gRVMJ8BJaX@cluster0.5m0mj.mongodb.net/sample_airbnb?retryWrites=true&w=majority"
+  connection_string: "mongodb://localhost:27017"

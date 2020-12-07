@@ -10,12 +10,9 @@ import (
 )
 
 func (db Database) CreatePost(c echo.Context) error {
-	fmt.Printf("CreatePost=======")
-	post := new(model.Post)
-
-	if err := c.Bind(post); err != nil {
-		fmt.Printf("post ==== > %+v", post)
-		fmt.Println("error Bind Post")
+	fmt.Println("CreatePost =======")
+	var post model.Post
+	if err := c.Bind(&post); err != nil {
 		return err
 	}
 

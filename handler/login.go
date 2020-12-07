@@ -27,7 +27,5 @@ func (db Database) Login(c echo.Context) error {
 			"code": http.StatusNotFound,
 		})
 	}
-
-	fmt.Println("profileId", profileId)
 	return c.JSON(http.StatusOK, profileId)
 }

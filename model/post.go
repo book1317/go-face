@@ -14,19 +14,19 @@ import (
 type Comment struct {
 	ObjectID primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
 	Content  string             `json:"content" bson:"content"`
-	Like     int                `json:"like" bson:"like"`
+	Like     []int              `json:"like" bson:"like"`
 	OwnerId  primitive.ObjectID `json:"owner_id" bson:"owner_id"`
 }
 
 type Post struct {
-	ObjectID primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	ObjectID primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	Content  string             `json:"content" bson:"content"`
-	Like     int                `json:"like" bson:"like"`
+	Like     []int              `json:"like" bson:"like"`
 	Comments []Comment          `json:"comments" bson:"comments"`
 	OwnerId  primitive.ObjectID `json:"owner_id" bson:"owner_id"`
 }
 
-func InsertPostDB(client *mongo.Client, post *Post) (primitive.ObjectID, error) {
+func InsertPostDB(client *mongo.Client, post Post) (primitive.ObjectID, error) {
 	col := client.Database(db_facebook).Collection(co_post)
 	result, err := col.InsertOne(context.TODO(), post)
 	postID, _ := result.InsertedID.(primitive.ObjectID)

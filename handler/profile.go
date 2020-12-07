@@ -21,9 +21,9 @@ func (db Database) GetProfiles(w http.ResponseWriter, r *http.Request) {
 
 func (db Database) GetProfileById(c echo.Context) error {
 	profileId := c.Param("id")
-
 	profile, err := model.GetProfileByIdDB(db.Client, profileId)
 	if err != nil {
+		fmt.Println("profileId ====> ", c.Param("id"))
 		fmt.Println("error ====> GetProfileByIdDB")
 		return c.JSON(http.StatusBadRequest, err)
 	}
@@ -50,8 +50,5 @@ func (db Database) UpdateProfileImageById(c echo.Context) error {
 		fmt.Println("error ====> GetProfileByIdDB")
 		return c.JSON(http.StatusBadRequest, err)
 	}
-
-	fmt.Println("profileIdd", profileIdd)
-
 	return c.JSON(http.StatusOK, gin.H{"data": profileIdd})
 }

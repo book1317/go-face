@@ -1,0 +1,5 @@
+users:
+  enable: true
+
+mongo:
+   connection_string: "mongodb+srv://book1317:1317@cluster0.qifgh.gcp.mongodb.net/facebook?retryWrites=true&w=majority"
